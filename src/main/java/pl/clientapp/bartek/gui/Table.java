@@ -200,6 +200,8 @@ public class Table extends JFrame {
 //                aboutFrame.setResizable(false);
 //                aboutFrame.setVisible(true);
 //                System.out.println("About - otwarcie okna");
+
+                
                 JOptionPane.showMessageDialog(null,
                         "<html><center>Aplikacja bazodanowa klientów<br/>Version 1.0<br/>© 2025</center></html>", "About",
                         JOptionPane.INFORMATION_MESSAGE );
