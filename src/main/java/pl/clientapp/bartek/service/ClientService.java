@@ -1,14 +1,12 @@
 package pl.clientapp.bartek.service;
 
+
 import org.apache.commons.lang3.StringUtils;
 import pl.clientapp.bartek.repository.ClientDocumentType;
 import pl.clientapp.bartek.repository.ClientModel;
 import pl.clientapp.bartek.repository.ClientRepository;
 import pl.clientapp.bartek.repository.ClientSex;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,6 +72,12 @@ public class ClientService {
 
         if (StringUtils.isBlank(sex)){
             validateMessages.put("Sex", "One option required");
+        } else {
+            ClientSex clientSex = ClientSex.valueFromGuiKey(sex);
+            ClientSex clientSexFromPesel = validateClientSex(pesel);
+            if (!clientSex.equals(clientSexFromPesel)) {
+                validateMessages.put("Sex", "Chosen option, does not match pesel");
+            }
         }
 
         return validateMessages;
@@ -137,10 +141,21 @@ public class ClientService {
 
         if (sum == Integer.parseInt(pesel.substring(10,11))) {
             return true;
+
         } else {
             return false;
         }
 
+    }
+
+    private ClientSex validateClientSex(String pesel) {
+
+        int sexNumber = Integer.parseInt((pesel.substring(9,10)));
+        if (sexNumber % 2 == 0) {
+            return ClientSex.WOMAN;
+        } else {
+            return ClientSex.MAN;
+        }
     }
 
     public boolean createClient(String firstName, String lastName, String pesel,
