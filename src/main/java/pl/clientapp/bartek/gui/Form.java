@@ -94,6 +94,7 @@ public class Form extends JFrame {
                         JOptionPane.showMessageDialog(null, "Client successfully saved!",
                                 "Confirmation", JOptionPane.INFORMATION_MESSAGE);
 
+                        dispose();
                     } else {
                         JOptionPane.showMessageDialog(null, " Client UNsussessfully saved!",
                                 "ERROR", JOptionPane.ERROR_MESSAGE);

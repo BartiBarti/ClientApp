@@ -22,6 +22,7 @@ public class Table extends JFrame {
     private JButton editButton;
     private JButton addButton;
     private JPanel mainPanel;
+    private JButton RefreshButton;
 
     private ClientService clientService = new ClientService();
 
@@ -75,6 +76,14 @@ public class Table extends JFrame {
                 }
 
             }
+        });
+        RefreshButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                loadTable();
+            }
+//            Table form - przycisk/ Nazwa przycisku - do kodu, text - nazwa przycisku/ stworzenie - action listener - create listener
+//            utworzył się ActionPerformed - my dodaliśmy metodę loadTable, żeby na się odświeżyła tabela. (ale metody dodajemy jakie chcemy, żeby coś przycisk robił
         });
     }
 
