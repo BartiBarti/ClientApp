@@ -84,6 +84,10 @@ public class ClientService {
 
     }
 
+    public void updateClient(ClientModel client){
+        clientRepository.updateClient(client);
+    }
+
     public boolean clientExists(String pesel, String documentNumber){
         return clientRepository.clientExist(pesel, documentNumber);
     }

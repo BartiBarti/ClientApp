@@ -1,5 +1,6 @@
 package pl.clientapp.bartek.gui;
 
+import pl.clientapp.bartek.repository.ClientDocumentType;
 import pl.clientapp.bartek.repository.ClientModel;
 import pl.clientapp.bartek.repository.ClientSex;
 import pl.clientapp.bartek.service.ClientService;
@@ -30,7 +31,7 @@ public class Form extends JFrame {
 
     private ClientService clientService = new ClientService();
 
-    public Form(ClientModel clientModel) {
+    public Form(ClientModel clientToUpdate) {
 
         setTitle("Client form");
         setSize(300, 300);
@@ -42,22 +43,20 @@ public class Form extends JFrame {
         sexGroup.add(womenRadioButton);
         sexGroup.add(manRadioButton);
 
-        if (clientModel != null) {
-            firstNameTextField.setText(clientModel.getFirstName());
-            lastNameTextField.setText(clientModel.getLastName());
-            peselTextField.setText(clientModel.getPesel());
-            if (ClientSex.MAN.equals(clientModel.getSex())) {
+        if (clientToUpdate != null) {
+            firstNameTextField.setText(clientToUpdate.getFirstName());
+            lastNameTextField.setText(clientToUpdate.getLastName());
+            peselTextField.setText(clientToUpdate.getPesel());
+            if (ClientSex.MAN.equals(clientToUpdate.getSex())) {
                 manRadioButton.setSelected(true);
             } else {
                 womenRadioButton.setSelected(true);
             }
-            documentTypeComboBox.setSelectedItem(clientModel.getDocumentType().getGuiKey());
-            documentNumberTextField.setText(clientModel.getDocumentNumber());
+            documentTypeComboBox.setSelectedItem(clientToUpdate.getDocumentType().getGuiKey());
+            documentNumberTextField.setText(clientToUpdate.getDocumentNumber());
         }
 
         saveButton.addActionListener(new ActionListener() {
-
-//            todo zmodyfikować tak, aby przy edycji uruchamiał się UPDATE a nie insert.
 
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -84,21 +83,37 @@ public class Form extends JFrame {
                     String joinedMassages = joinMassages(validateMessages);
                     JOptionPane.showMessageDialog(null, joinedMassages,
                             "Validation ERROR", JOptionPane.WARNING_MESSAGE);
-                } else if (clientService.clientExists(pesel, documentNumber)){
+
+                } else if (clientService.clientExists(pesel, documentNumber) && clientToUpdate == null){
                     JOptionPane.showMessageDialog(null, "Client already exists!", "ERROR",
                             JOptionPane.ERROR_MESSAGE);
                 } else {
-                    boolean saveSuccess = clientService.createClient(firstName, lastName, pesel, sex,
-                            documentType, documentNumber);
-                    if (saveSuccess) {
-                        JOptionPane.showMessageDialog(null, "Client successfully saved!",
-                                "Confirmation", JOptionPane.INFORMATION_MESSAGE);
+                    if (clientToUpdate == null){
+                        boolean saveSuccess = clientService.createClient(firstName, lastName, pesel, sex,
+                                documentType, documentNumber);
+                        if (saveSuccess) {
+                            JOptionPane.showMessageDialog(null, "Client successfully saved!",
+                                    "Confirmation", JOptionPane.INFORMATION_MESSAGE);
 
-                        dispose();
+                            dispose();
+                        } else {
+                            JOptionPane.showMessageDialog(null, " Client UNsussessfully saved!",
+                                    "ERROR", JOptionPane.ERROR_MESSAGE);
+                        }
                     } else {
-                        JOptionPane.showMessageDialog(null, " Client UNsussessfully saved!",
-                                "ERROR", JOptionPane.ERROR_MESSAGE);
+                        ClientModel updatedClient = new ClientModel();
+                        updatedClient.setFirstName(firstName);
+                        updatedClient.setLastName(lastName);
+                        updatedClient.setPesel(pesel);
+                        updatedClient.setSex(ClientSex.valueFromGuiKey(sex));
+                        updatedClient.setDocumentType(ClientDocumentType.valueFromGuiKey(documentType));
+                        updatedClient.setDocumentNumber(documentNumber);
+                        updatedClient.setId(clientToUpdate.getId());
+
+                        clientService.updateClient(updatedClient);
+//                        todo do zrobienia potwierdzenie zaktualizowania klienta w formie dialogu, czyli okienka - druga wersja about
                     }
+
                 }
             }
         });

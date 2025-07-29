@@ -11,6 +11,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.util.List;
 
 public class Table extends JFrame {
@@ -135,6 +136,7 @@ public class Table extends JFrame {
         exportMenuItem.setPreferredSize(new Dimension(150, 30));
         JMenuItem closeMenuItem = new JMenuItem("Close");
         closeMenuItem.setPreferredSize(new Dimension(150, 30));
+        closeMenuItem.setAccelerator(KeyStroke.getKeyStroke("control Q"));
         closeMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -152,6 +154,8 @@ public class Table extends JFrame {
         JMenu editMenu = new JMenu("Edit");
         JMenuItem addClientMenuItem = new JMenuItem("Add Client");
         addClientMenuItem.setPreferredSize(new Dimension(150, 30));
+//        addClientMenuItem.setAccelerator(KeyStroke.getKeyStroke("control N"));
+        addClientMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, KeyEvent.CTRL_DOWN_MASK));
         addClientMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -197,28 +201,65 @@ public class Table extends JFrame {
             public void actionPerformed(ActionEvent e) {
 
 //                todo utworzyć okno "About"
-//                JFrame aboutFrame = new JFrame("About");
-//
-//                JLabel aboutLabel = new JLabel("<html><center>Aplikacja bazodanowa klientów<br/>Version 1.0<br/>© 2025</center></html>", SwingConstants.CENTER);
-//                aboutLabel.setFont(new Font("Arial", Font.PLAIN, 14));
-//                aboutFrame.add(aboutLabel);
-//
-//                aboutFrame.setSize(300, 150);
-//                aboutFrame.setLocationRelativeTo(null);
-//                aboutFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Zamknięcie tylko tego okna
-//                aboutFrame.setResizable(false);
-//                aboutFrame.setVisible(true);
-//                System.out.println("About - otwarcie okna");
+                JFrame aboutFrame = new JFrame("About");
+                aboutFrame.setLayout(new FlowLayout());
+
+                JLabel aboutTitleLabel = new JLabel("<html>" +
+                        "<center>Aplikacja bazodanowa klientów<br/>" +
+                        "Mateusz & Bartek Software House<br/>" +
+                        "</center></html>", SwingConstants.CENTER);
+                aboutTitleLabel.setFont(new Font("Arial", Font.BOLD, 15));
+                aboutFrame.add(aboutTitleLabel);
+
+                JLabel aboutDescriptionLabel = new JLabel("<html>" +
+                        "<center>Program do obsługi bazy danych klientów firmy<br/>" +
+                        "Version 1.0<br/>" +
+                        "© 07.2025</center></html>", SwingConstants.CENTER);
+                aboutDescriptionLabel.setFont(new Font("Times New Roman", Font.PLAIN, 14));
+                aboutFrame.add(aboutDescriptionLabel);
+
+
+                aboutFrame.setSize(350, 150);
+                aboutFrame.setLocationRelativeTo(null);
+                aboutFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Zamknięcie tylko tego okna
+                aboutFrame.setResizable(false); // maksymalizacja okna wyłączona
+                aboutFrame.setVisible(true);
+                System.out.println("About - otwarcie okna");
 
                 
-                JOptionPane.showMessageDialog(null,
-                        "<html><center>Aplikacja bazodanowa klientów<br/>Version 1.0<br/>© 2025</center></html>", "About",
-                        JOptionPane.INFORMATION_MESSAGE );
+//                JOptionPane.showMessageDialog(null,
+//                        "<html><center>Aplikacja bazodanowa klientów<br/>Version 1.0<br/>© 2025</center></html>", "About",
+//                        JOptionPane.INFORMATION_MESSAGE ); // opcja w JOptionPane - okna dialogowe
             }
         });
         aboutMenuItem.setPreferredSize(new Dimension(150, 30));
         JMenuItem shortcutsMenuItem = new JMenuItem("Shortcuts");
         shortcutsMenuItem.setPreferredSize(new Dimension(150, 30));
+        shortcutsMenuItem.setAccelerator(KeyStroke.getKeyStroke("control H"));
+//        shortcutsMenuItem.addActionListener(e -> showShortcutsDialog());
+
+        shortcutsMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String shortcuts = """
+                <html><pre>
+                Ctrl + A → Add Client
+                Ctrl + N → Edit Selected
+                Ctrl + D → Delete Selected
+                Ctrl + R → Refresh Table
+                Ctrl + Q → Close
+                Ctrl + H → Show Shortcuts
+                </pre></html>
+                """;
+
+                JOptionPane.showMessageDialog(
+                        null,
+                        shortcuts,
+                        "Keyboard Shortcuts",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+            }
+        });
         helpMenu.add(aboutMenuItem);
         helpMenu.add(shortcutsMenuItem);
         jMenuBar.add(helpMenu);
@@ -226,6 +267,40 @@ public class Table extends JFrame {
 
 
     }
+//    private void showShortcutsDialog() {
+//        JDialog dialog = new JDialog(this, "Skróty klawiszowe", true);
+//        dialog.setSize(400, 250);
+//        dialog.setLocationRelativeTo(this);
+//        dialog.setLayout(new BorderLayout());
+//
+//        JLabel label = new JLabel("""
+//        <html>
+//        <h3 style='text-align: center;'>Skróty klawiszowe</h3>
+//        <ul>
+//          <li><b>Ctrl + N</b> – Dodaj klienta</li>
+//          <li><b>Ctrl + E</b> – Edytuj klienta</li>
+//          <li><b>Ctrl + D</b> – Usuń klienta</li>
+//          <li><b>Ctrl + R</b> – Odśwież tabelę</li>
+//          <li><b>Ctrl + Q</b> – Zamknij aplikację</li>
+//          <li><b>Ctrl + H</b> – Pokaż pomoc</li>
+//        </ul>
+//        </html>
+//        """);
+//        label.setBorder(new EmptyBorder(10, 20, 10, 20));
+//        dialog.add(label, BorderLayout.CENTER);
+//
+//        JPanel bottomPanel = new JPanel();
+//        JCheckBox doNotShowAgain = new JCheckBox("Nie pokazuj ponownie");
+//        JButton okButton = new JButton("OK");
+//
+//        okButton.addActionListener(e -> dialog.dispose());
+//        bottomPanel.add(doNotShowAgain);
+//        bottomPanel.add(okButton);
+//
+//        dialog.add(bottomPanel, BorderLayout.SOUTH);
+//        dialog.setVisible(true);
+//    }
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new Table().setVisible(true));
