@@ -143,7 +143,7 @@ public class ClientRepository {
 
     }
 
-    public void updateClient(ClientModel client) {
+    public boolean updateClient(ClientModel client) {
 
         try {
 
@@ -175,9 +175,10 @@ public class ClientRepository {
             statement.executeUpdate(query);
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+             e.printStackTrace();
+            return false;
         }
-
+        return true;
     }
 
 

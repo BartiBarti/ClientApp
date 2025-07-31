@@ -23,7 +23,7 @@ public class Table extends JFrame {
     private JButton editButton;
     private JButton addButton;
     private JPanel mainPanel;
-    private JButton RefreshButton;
+    private JButton refreshButton;
 
     private ClientService clientService = new ClientService();
 
@@ -53,32 +53,12 @@ public class Table extends JFrame {
         editButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int selectedRow = clientsTable.getSelectedRow();
-                if (selectedRow == -1) {
-                    JOptionPane.showMessageDialog(null, "No clients selected yet!",
-                            "WARNING", JOptionPane.WARNING_MESSAGE);
-                } else {
-                    int selectedClientID = (int) clientsTable.getValueAt(selectedRow, 0 );
-                    String selectedFirstName = (String) clientsTable.getValueAt(selectedRow, 1);
-                    String selectedLastName = (String) clientsTable.getValueAt(selectedRow, 2);
-                    String selectedPesel = (String) clientsTable.getValueAt(selectedRow, 3);
-                    ClientSex selectedSex = (ClientSex) clientsTable.getValueAt(selectedRow, 4);
-                    ClientDocumentType  selectedDocumentType = (ClientDocumentType) clientsTable.getValueAt(selectedRow, 5);
-                    String selectedDocumentNumber = (String) clientsTable.getValueAt(selectedRow, 6);
-                    ClientModel clientModel = new ClientModel();
-                    clientModel.setId(selectedClientID);
-                    clientModel.setFirstName(selectedFirstName);
-                    clientModel.setLastName(selectedLastName);
-                    clientModel.setPesel(selectedPesel);
-                    clientModel.setSex(selectedSex);
-                    clientModel.setDocumentType(selectedDocumentType);
-                    clientModel.setDocumentNumber(selectedDocumentNumber);
-                    SwingUtilities.invokeLater(() -> new Form(clientModel).setVisible(true));
-                }
+                editClientAction();
 
             }
         });
-        RefreshButton.addActionListener(new ActionListener() {
+        // todo - dodać skrót do odświeżenia tabeli za pomoca KEY - LISTENERA
+        refreshButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 loadTable();
@@ -86,6 +66,31 @@ public class Table extends JFrame {
 //            Table form - przycisk/ Nazwa przycisku - do kodu, text - nazwa przycisku/ stworzenie - action listener - create listener
 //            utworzył się ActionPerformed - my dodaliśmy metodę loadTable, żeby na się odświeżyła tabela. (ale metody dodajemy jakie chcemy, żeby coś przycisk robił
         });
+    }
+
+    private void editClientAction() {
+        int selectedRow = clientsTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(null, "No clients selected yet!",
+                    "WARNING", JOptionPane.WARNING_MESSAGE);
+        } else {
+            int selectedClientID = (int) clientsTable.getValueAt(selectedRow, 0);
+            String selectedFirstName = (String) clientsTable.getValueAt(selectedRow, 1);
+            String selectedLastName = (String) clientsTable.getValueAt(selectedRow, 2);
+            String selectedPesel = (String) clientsTable.getValueAt(selectedRow, 3);
+            ClientSex selectedSex = (ClientSex) clientsTable.getValueAt(selectedRow, 4);
+            ClientDocumentType selectedDocumentType = (ClientDocumentType) clientsTable.getValueAt(selectedRow, 5);
+            String selectedDocumentNumber = (String) clientsTable.getValueAt(selectedRow, 6);
+            ClientModel clientModel = new ClientModel();
+            clientModel.setId(selectedClientID);
+            clientModel.setFirstName(selectedFirstName);
+            clientModel.setLastName(selectedLastName);
+            clientModel.setPesel(selectedPesel);
+            clientModel.setSex(selectedSex);
+            clientModel.setDocumentType(selectedDocumentType);
+            clientModel.setDocumentNumber(selectedDocumentNumber);
+            SwingUtilities.invokeLater(() -> new Form(clientModel).setVisible(true));
+        }
     }
 
     private void deleteAction() {
@@ -162,10 +167,22 @@ public class Table extends JFrame {
                 SwingUtilities.invokeLater(() -> new Form(null).setVisible(true));
             }
         });
+
         JMenuItem editSelectedMenuItem = new JMenuItem("Edit Selected");
         editSelectedMenuItem.setPreferredSize(new Dimension(150, 30));
+        editSelectedMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, KeyEvent.CTRL_DOWN_MASK));
+
+        editSelectedMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                editClientAction();
+            }
+        });
+
         JMenuItem deleteSelectedMenuItem = new JMenuItem("Delete Selected");
         deleteSelectedMenuItem.setPreferredSize(new Dimension(150, 30));
+        deleteSelectedMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, KeyEvent.CTRL_DOWN_MASK));
+
         deleteSelectedMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -180,19 +197,15 @@ public class Table extends JFrame {
         editMenu.add(clearAllClients);
         jMenuBar.add(editMenu);
 
-
         JMenu viewMenu = new JMenu("View");
-        JMenuItem refreshTableMenuItem = new JMenuItem("Refresh Table");
-        refreshTableMenuItem.setPreferredSize(new Dimension(150, 30));
+
         JMenuItem sortClientsMenuItem = new JMenuItem("Sort Clients");
         sortClientsMenuItem.setPreferredSize(new Dimension(150, 30));
         JMenuItem showStatisticsMenuItem = new JMenuItem("Show Statistics");
         showStatisticsMenuItem.setPreferredSize(new Dimension(150, 30));
-        viewMenu.add(refreshTableMenuItem);
         viewMenu.add(sortClientsMenuItem);
         viewMenu.add(showStatisticsMenuItem);
         jMenuBar.add(viewMenu);
-
 
         JMenu helpMenu = new JMenu("Help");
         JMenuItem aboutMenuItem = new JMenuItem("About");
@@ -200,7 +213,6 @@ public class Table extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-//                todo utworzyć okno "About"
                 JFrame aboutFrame = new JFrame("About");
                 aboutFrame.setLayout(new FlowLayout());
 
@@ -226,7 +238,7 @@ public class Table extends JFrame {
                 aboutFrame.setVisible(true);
                 System.out.println("About - otwarcie okna");
 
-                
+
 //                JOptionPane.showMessageDialog(null,
 //                        "<html><center>Aplikacja bazodanowa klientów<br/>Version 1.0<br/>© 2025</center></html>", "About",
 //                        JOptionPane.INFORMATION_MESSAGE ); // opcja w JOptionPane - okna dialogowe
@@ -235,22 +247,22 @@ public class Table extends JFrame {
         aboutMenuItem.setPreferredSize(new Dimension(150, 30));
         JMenuItem shortcutsMenuItem = new JMenuItem("Shortcuts");
         shortcutsMenuItem.setPreferredSize(new Dimension(150, 30));
-        shortcutsMenuItem.setAccelerator(KeyStroke.getKeyStroke("control H"));
-//        shortcutsMenuItem.addActionListener(e -> showShortcutsDialog());
+        shortcutsMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_DOWN_MASK));
+
 
         shortcutsMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String shortcuts = """
-                <html><pre>
-                Ctrl + A → Add Client
-                Ctrl + N → Edit Selected
-                Ctrl + D → Delete Selected
-                Ctrl + R → Refresh Table
-                Ctrl + Q → Close
-                Ctrl + H → Show Shortcuts
-                </pre></html>
-                """;
+                        <html><pre>
+                        Ctrl + N → Add Client
+                        Ctrl + E → Edit Selected
+                        Ctrl + D → Delete Selected
+                        Ctrl + R → Refresh Table
+                        Ctrl + Q → Close
+                        Ctrl + S → Show Shortcuts
+                        </pre></html>
+                        """;
 
                 JOptionPane.showMessageDialog(
                         null,
@@ -260,47 +272,13 @@ public class Table extends JFrame {
                 );
             }
         });
+
         helpMenu.add(aboutMenuItem);
         helpMenu.add(shortcutsMenuItem);
         jMenuBar.add(helpMenu);
         setJMenuBar(jMenuBar);
 
-
     }
-//    private void showShortcutsDialog() {
-//        JDialog dialog = new JDialog(this, "Skróty klawiszowe", true);
-//        dialog.setSize(400, 250);
-//        dialog.setLocationRelativeTo(this);
-//        dialog.setLayout(new BorderLayout());
-//
-//        JLabel label = new JLabel("""
-//        <html>
-//        <h3 style='text-align: center;'>Skróty klawiszowe</h3>
-//        <ul>
-//          <li><b>Ctrl + N</b> – Dodaj klienta</li>
-//          <li><b>Ctrl + E</b> – Edytuj klienta</li>
-//          <li><b>Ctrl + D</b> – Usuń klienta</li>
-//          <li><b>Ctrl + R</b> – Odśwież tabelę</li>
-//          <li><b>Ctrl + Q</b> – Zamknij aplikację</li>
-//          <li><b>Ctrl + H</b> – Pokaż pomoc</li>
-//        </ul>
-//        </html>
-//        """);
-//        label.setBorder(new EmptyBorder(10, 20, 10, 20));
-//        dialog.add(label, BorderLayout.CENTER);
-//
-//        JPanel bottomPanel = new JPanel();
-//        JCheckBox doNotShowAgain = new JCheckBox("Nie pokazuj ponownie");
-//        JButton okButton = new JButton("OK");
-//
-//        okButton.addActionListener(e -> dialog.dispose());
-//        bottomPanel.add(doNotShowAgain);
-//        bottomPanel.add(okButton);
-//
-//        dialog.add(bottomPanel, BorderLayout.SOUTH);
-//        dialog.setVisible(true);
-//    }
-
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new Table().setVisible(true));

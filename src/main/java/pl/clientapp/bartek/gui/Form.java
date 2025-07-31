@@ -94,7 +94,6 @@ public class Form extends JFrame {
                         if (saveSuccess) {
                             JOptionPane.showMessageDialog(null, "Client successfully saved!",
                                     "Confirmation", JOptionPane.INFORMATION_MESSAGE);
-
                             dispose();
                         } else {
                             JOptionPane.showMessageDialog(null, " Client UNsussessfully saved!",
@@ -110,8 +109,17 @@ public class Form extends JFrame {
                         updatedClient.setDocumentNumber(documentNumber);
                         updatedClient.setId(clientToUpdate.getId());
 
-                        clientService.updateClient(updatedClient);
-//                        todo do zrobienia potwierdzenie zaktualizowania klienta w formie dialogu, czyli okienka - druga wersja about
+
+                        boolean updateSuccess = clientService.updateClient(updatedClient);
+                        if (updateSuccess) {
+                            JOptionPane.showMessageDialog(null, "Client sccessfully updated",
+                                    "Confirmation", JOptionPane.INFORMATION_MESSAGE);
+                            dispose();
+                        } else {
+                            JOptionPane.showMessageDialog(null, " Client UNsussessfully updated!",
+                                    "ERROR", JOptionPane.ERROR_MESSAGE);
+                        }
+
                     }
 
                 }

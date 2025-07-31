@@ -84,8 +84,8 @@ public class ClientService {
 
     }
 
-    public void updateClient(ClientModel client){
-        clientRepository.updateClient(client);
+    public boolean updateClient(ClientModel client){
+        return clientRepository.updateClient(client);
     }
 
     public boolean clientExists(String pesel, String documentNumber){
@@ -178,5 +178,5 @@ public class ClientService {
 
     }
 
-
+// zmiany po warstwach - repozytorium, serwisowa, i ost GUI - tak zmieniamy updateClient
 }
