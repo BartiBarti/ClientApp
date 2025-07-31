@@ -30,16 +30,38 @@ public class ClientRepository {
             ResultSet resultSet = statement.executeQuery("select * from clients;");
             while (resultSet.next()) {
                 ClientModel client = getClientFromResultSet(resultSet);
-
                 clientsList.add(client);
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+        return clientsList;
+    }
 
+    public List<ClientModel> findClientsByString(String searchText){
+
+        List<ClientModel> clientsList = new ArrayList<>();
+
+        try {
+            Statement statement = connection.createStatement();
+            String query = "select * from clients c where c.FirstName like '%?%' " +
+                                                    "or c.LastName like '%?%' " +
+                                                    "or c.Pesel like '%?%' " +
+                                                    "or c.DocumentNumber like '%?%';";
+            query = query.replaceAll("\\?", searchText);
+            ResultSet resultSet = statement.executeQuery(query);
+            while (resultSet.next()) {
+                ClientModel client = getClientFromResultSet(resultSet);
+                clientsList.add(client);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         return clientsList;
 
     }
+
+
 
     public ClientModel findClientById(int id) {
 
@@ -114,20 +136,6 @@ public class ClientRepository {
         return client;
     }
 
-//    public void deleteClient(int id) {
-//
-//        try {
-//
-//            Statement statement = connection.createStatement();
-//            String query = "delete from clients where ID = %d";
-//            String filledQuery = String.format(query, id);
-//            statement.executeUpdate(filledQuery);
-//
-//        } catch (SQLException e) {
-//            throw new RuntimeException(e);
-//        }
-//
-//    }
     public void deleteClient(int clientId) {
 
         try {
@@ -180,6 +188,8 @@ public class ClientRepository {
         }
         return true;
     }
+
+
 
 
 }
