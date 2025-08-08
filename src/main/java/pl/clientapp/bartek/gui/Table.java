@@ -11,7 +11,9 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.File;
 import java.util.List;
 
 public class Table extends JFrame {
@@ -36,7 +38,7 @@ public class Table extends JFrame {
         setContentPane(mainPanel);
         showMenuBar();
         clientsTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        loadTable();
+        loadTable(null);
 
         addButton.addActionListener(new ActionListener() {
             @Override
@@ -57,15 +59,41 @@ public class Table extends JFrame {
 
             }
         });
-        // todo - dodać skrót do odświeżenia tabeli za pomoca KEY - LISTENERA
+
         refreshButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                loadTable();
+                loadTable(null);
             }
 //            Table form - przycisk/ Nazwa przycisku - do kodu, text - nazwa przycisku/ stworzenie - action listener - create listener
 //            utworzył się ActionPerformed - my dodaliśmy metodę loadTable, żeby na się odświeżyła tabela. (ale metody dodajemy jakie chcemy, żeby coś przycisk robił
         });
+        refreshButton.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                int keyPressed = e.getKeyCode();
+
+                    if (KeyEvent.VK_R == keyPressed) {
+                        loadTable(null);
+                        System.out.println("test");
+                    }
+            }
+        });
+
+
+        searchTextField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                int keyPressed = e.getKeyCode();
+                if (KeyEvent.VK_ENTER == keyPressed) {
+                    String searchText = searchTextField.getText();
+                    List<ClientModel> filteredClients = clientService.getClientByString(searchText);
+                    loadTable(filteredClients);
+                }
+
+            }
+        });
+
     }
 
     private void editClientAction() {
@@ -106,17 +134,24 @@ public class Table extends JFrame {
                 clientService.deleteClient(selectedClientID);
                 JOptionPane.showMessageDialog(null, "Client Deleted",
                         "DELETED", JOptionPane.INFORMATION_MESSAGE);
-                loadTable();
+                loadTable(null);
             }
         }
     }
 
-    private void loadTable() {
+    private void loadTable(List<ClientModel> clients) {
         String[] headers = new String[]{"ID", "First name", "Last name", "Pesel", "Sex", "Document Type", "Document number"};
         DefaultTableModel tableModel = new DefaultTableModel(headers, 0);
         tableModel.setRowCount(0);
+        List<ClientModel> clientModelList;
+        if (clients == null ){
+            clientModelList = clientService.getAllClients();
+        } else {
 
-        List<ClientModel> clientModelList = clientService.getAllClients();
+            clientModelList = clients;
+        }
+
+
         for (ClientModel client : clientModelList) {
             tableModel.addRow(new Object[]{client.getId(),
                     client.getFirstName(),
@@ -137,6 +172,18 @@ public class Table extends JFrame {
         JMenu fileMenu = new JMenu("File");
         JMenuItem importMenuItem = new JMenuItem("Import");
         importMenuItem.setPreferredSize(new Dimension(150, 30));
+        importMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setDialogTitle("Choose CSV File!");
+                int fileChooserResult = fileChooser.showOpenDialog(Table.this);
+                if(fileChooserResult == JFileChooser.APPROVE_OPTION){
+                    File selectedFile = fileChooser.getSelectedFile();
+                    System.out.println(selectedFile.getAbsolutePath());
+                }
+            }
+        });
         JMenuItem exportMenuItem = new JMenuItem("Export");
         exportMenuItem.setPreferredSize(new Dimension(150, 30));
         JMenuItem closeMenuItem = new JMenuItem("Close");

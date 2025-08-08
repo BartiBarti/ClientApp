@@ -122,8 +122,11 @@ public class ClientService {
     }
 
     public List<ClientModel> getAllClients (){
-
         return clientRepository.findAllClients();
+    }
+
+    public List<ClientModel> getClientByString (String searchText){
+        return clientRepository.findClientsByString(searchText);
 
     }
 

@@ -60,6 +60,36 @@ public class ClientRepository {
         return clientsList;
 
     }
+//    -----------------------------------------------------
+
+//    public List<ClientModel> findClientsByString(String searchText) {
+//
+//        List<ClientModel> clientsList = new ArrayList<>();
+//
+//        String sql = "SELECT * FROM clients c " +
+//                "WHERE LOWER(c.FirstName) LIKE ? " +
+//                "OR LOWER(c.LastName) LIKE ? " +
+//                "OR c.Pesel LIKE ? " +
+//                "OR LOWER(c.DocumentNumber) LIKE ?";
+//
+//        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+//            String pattern = "%" + searchText.toLowerCase() + "%";
+//            statement.setString(1, pattern);
+//            statement.setString(2, pattern);
+//            statement.setString(3, "%" + searchText + "%"); // pesel nie trzeba zamieniać na lower
+//            statement.setString(4, pattern);
+//
+//            ResultSet resultSet = statement.executeQuery();
+//            while (resultSet.next()) {
+//                ClientModel client = getClientFromResultSet(resultSet);
+//                clientsList.add(client);
+//            }
+//        } catch (SQLException e) {
+//            throw new RuntimeException(e);
+//        }
+//
+//        return clientsList;
+//    }
 
 
 
