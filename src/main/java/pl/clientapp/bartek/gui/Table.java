@@ -7,6 +7,7 @@ import pl.clientapp.bartek.service.ClientService;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -15,6 +16,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.List;
+import java.util.Locale;
 
 public class Table extends JFrame {
     private JLabel searchLabel;
@@ -27,13 +29,15 @@ public class Table extends JFrame {
     private JPanel mainPanel;
     private JButton refreshButton;
 
+    private static Table table;
+
     private ClientService clientService = new ClientService();
 
     public Table() {
         setTitle("Clients table");
         setSize(600, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
+        setLocationRelativeTo(Table.this);
         mainPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
         setContentPane(mainPanel);
         showMenuBar();
@@ -43,7 +47,7 @@ public class Table extends JFrame {
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                SwingUtilities.invokeLater(() -> new Form(null).setVisible(true));
+                SwingUtilities.invokeLater(() -> new Form(null, table).setVisible(true));
             }
         });
         deleteButton.addActionListener(new ActionListener() {
@@ -73,10 +77,10 @@ public class Table extends JFrame {
             public void keyReleased(KeyEvent e) {
                 int keyPressed = e.getKeyCode();
 
-                    if (KeyEvent.VK_R == keyPressed) {
-                        loadTable(null);
-                        System.out.println("test");
-                    }
+                if (KeyEvent.VK_R == keyPressed) {
+                    loadTable(null);
+                    System.out.println("test");
+                }
             }
         });
 
@@ -99,7 +103,7 @@ public class Table extends JFrame {
     private void editClientAction() {
         int selectedRow = clientsTable.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(null, "No clients selected yet!",
+            JOptionPane.showMessageDialog(Table.this, "No clients selected yet!",
                     "WARNING", JOptionPane.WARNING_MESSAGE);
         } else {
             int selectedClientID = (int) clientsTable.getValueAt(selectedRow, 0);
@@ -117,22 +121,22 @@ public class Table extends JFrame {
             clientModel.setSex(selectedSex);
             clientModel.setDocumentType(selectedDocumentType);
             clientModel.setDocumentNumber(selectedDocumentNumber);
-            SwingUtilities.invokeLater(() -> new Form(clientModel).setVisible(true));
+            SwingUtilities.invokeLater(() -> new Form(clientModel, table).setVisible(true));
         }
     }
 
     private void deleteAction() {
         int selectedRow = clientsTable.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(null, "No clients selected yet!",
+            JOptionPane.showMessageDialog(Table.this, "No clients selected yet!",
                     "WARNING", JOptionPane.WARNING_MESSAGE);
         } else {
-            int confirmation = JOptionPane.showConfirmDialog(null, "Are you sure you want \n to delete this client?",
+            int confirmation = JOptionPane.showConfirmDialog(Table.this, "Are you sure you want \n to delete this client?",
                     "CONFIRMATION", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
             if (confirmation == JOptionPane.YES_OPTION) {
                 int selectedClientID = (int) clientsTable.getValueAt(selectedRow, 0);
                 clientService.deleteClient(selectedClientID);
-                JOptionPane.showMessageDialog(null, "Client Deleted",
+                JOptionPane.showMessageDialog(Table.this, "Client Deleted",
                         "DELETED", JOptionPane.INFORMATION_MESSAGE);
                 loadTable(null);
             }
@@ -144,7 +148,7 @@ public class Table extends JFrame {
         DefaultTableModel tableModel = new DefaultTableModel(headers, 0);
         tableModel.setRowCount(0);
         List<ClientModel> clientModelList;
-        if (clients == null ){
+        if (clients == null) {
             clientModelList = clientService.getAllClients();
         } else {
 
@@ -177,10 +181,22 @@ public class Table extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fileChooser = new JFileChooser();
                 fileChooser.setDialogTitle("Choose CSV File!");
+                FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV.files (*.csv)", "csv");
+                fileChooser.setFileFilter(filter);
                 int fileChooserResult = fileChooser.showOpenDialog(Table.this);
-                if(fileChooserResult == JFileChooser.APPROVE_OPTION){
+                if (fileChooserResult == JFileChooser.APPROVE_OPTION) {
                     File selectedFile = fileChooser.getSelectedFile();
+                    String fileCSVName = selectedFile.getName();
+                    int lastDotIndex = fileCSVName.lastIndexOf('.');
+                    if (lastDotIndex > 0) {
+                        String fileExtension = fileCSVName.substring(lastDotIndex + 1).toLowerCase();
+                        if (!fileExtension.equals("csv")) {
+                            JOptionPane.showMessageDialog
+                                    (Table.this, "Wrong file Extention", "ERROR", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
                     System.out.println(selectedFile.getAbsolutePath());
+
                 }
             }
         });
@@ -211,7 +227,7 @@ public class Table extends JFrame {
         addClientMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                SwingUtilities.invokeLater(() -> new Form(null).setVisible(true));
+                SwingUtilities.invokeLater(() -> new Form(null, table).setVisible(true));
             }
         });
 
@@ -312,7 +328,7 @@ public class Table extends JFrame {
                         """;
 
                 JOptionPane.showMessageDialog(
-                        null,
+                        Table.this,
                         shortcuts,
                         "Keyboard Shortcuts",
                         JOptionPane.INFORMATION_MESSAGE
@@ -328,7 +344,10 @@ public class Table extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new Table().setVisible(true));
+        SwingUtilities.invokeLater(() -> {
+            table = new Table();
+            table.setVisible(true);
+        });
     }
 
 

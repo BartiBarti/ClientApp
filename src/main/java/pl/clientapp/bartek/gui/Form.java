@@ -31,12 +31,12 @@ public class Form extends JFrame {
 
     private ClientService clientService = new ClientService();
 
-    public Form(ClientModel clientToUpdate) {
+    public Form(ClientModel clientToUpdate, Table table) {
 
         setTitle("Client form");
         setSize(300, 300);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
+        setLocationRelativeTo(table);
         jMainPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
         setContentPane(jMainPanel);
         ButtonGroup sexGroup = new ButtonGroup();
@@ -81,22 +81,22 @@ public class Form extends JFrame {
                         documentType, documentNumber);
                 if (!validateMessages.isEmpty()) {
                     String joinedMassages = joinMassages(validateMessages);
-                    JOptionPane.showMessageDialog(null, joinedMassages,
+                    JOptionPane.showMessageDialog(Form.this, joinedMassages,
                             "Validation ERROR", JOptionPane.WARNING_MESSAGE);
 
                 } else if (clientService.clientExists(pesel, documentNumber) && clientToUpdate == null){
-                    JOptionPane.showMessageDialog(null, "Client already exists!", "ERROR",
+                    JOptionPane.showMessageDialog(Form.this, "Client already exists!", "ERROR",
                             JOptionPane.ERROR_MESSAGE);
                 } else {
                     if (clientToUpdate == null){
                         boolean saveSuccess = clientService.createClient(firstName, lastName, pesel, sex,
                                 documentType, documentNumber);
                         if (saveSuccess) {
-                            JOptionPane.showMessageDialog(null, "Client successfully saved!",
+                            JOptionPane.showMessageDialog(Form.this, "Client successfully saved!",
                                     "Confirmation", JOptionPane.INFORMATION_MESSAGE);
                             dispose();
                         } else {
-                            JOptionPane.showMessageDialog(null, " Client UNsussessfully saved!",
+                            JOptionPane.showMessageDialog(Form.this, " Client UNsussessfully saved!",
                                     "ERROR", JOptionPane.ERROR_MESSAGE);
                         }
                     } else {
@@ -112,11 +112,11 @@ public class Form extends JFrame {
 
                         boolean updateSuccess = clientService.updateClient(updatedClient);
                         if (updateSuccess) {
-                            JOptionPane.showMessageDialog(null, "Client sccessfully updated",
+                            JOptionPane.showMessageDialog(Form.this, "Client sccessfully updated",
                                     "Confirmation", JOptionPane.INFORMATION_MESSAGE);
                             dispose();
                         } else {
-                            JOptionPane.showMessageDialog(null, " Client UNsussessfully updated!",
+                            JOptionPane.showMessageDialog(Form.this, " Client UNsussessfully updated!",
                                     "ERROR", JOptionPane.ERROR_MESSAGE);
                         }
 
