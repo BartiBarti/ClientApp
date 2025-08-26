@@ -14,9 +14,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class Table extends JFrame {
     private JLabel searchLabel;
@@ -32,6 +36,8 @@ public class Table extends JFrame {
     private static Table table;
 
     private ClientService clientService = new ClientService();
+
+    private static final String[] EXPECTED_HEADERS = {"FIRST_NAME", "LAST_NAME", "PESEL", "SEX", "DOCUMENT_TYPE", "DOCUMENT_NUMBER"};
 
     public Table() {
         setTitle("Clients table");
@@ -193,6 +199,40 @@ public class Table extends JFrame {
                         if (!fileExtension.equals("csv")) {
                             JOptionPane.showMessageDialog
                                     (Table.this, "Wrong file Extention", "ERROR", JOptionPane.ERROR_MESSAGE);
+                        } else {
+                            try {
+                                BufferedReader reader = new BufferedReader(new FileReader(selectedFile));
+                                String line;
+                                Boolean isHeader = true;
+                                Boolean isHeaderValid = true;
+                                while ((line = reader.readLine()) != null) {
+                                    System.out.println(line);
+                                    if (isHeader) {
+                                        isHeader = false;
+                                        String[] headersFromFile = line.split(",");
+//                                        todo sprawdzić długość nagłówków
+                                        for (int i = 0; i < headersFromFile.length; i++) {
+                                            if (!Objects.equals(headersFromFile[i], EXPECTED_HEADERS[i])) {
+                                                JOptionPane.showMessageDialog(Table.this,
+                                                        "Wrong Headers Names",
+                                                        "ERROR",
+                                                        JOptionPane.ERROR_MESSAGE);
+                                                isHeaderValid = false;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    if ( !isHeaderValid ){
+                                        break;
+                                    } else {
+//                                        todo dalsza część importu
+                                    }
+
+                                }
+                            } catch (IOException ex) {
+                                ex.printStackTrace();
+                            }
+
                         }
                     }
                     System.out.println(selectedFile.getAbsolutePath());
