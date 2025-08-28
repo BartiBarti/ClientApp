@@ -19,7 +19,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
-import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 
 public class Table extends JFrame {
@@ -210,22 +210,46 @@ public class Table extends JFrame {
                                     if (isHeader) {
                                         isHeader = false;
                                         String[] headersFromFile = line.split(",");
-//                                        todo sprawdzić długość nagłówków
-                                        for (int i = 0; i < headersFromFile.length; i++) {
-                                            if (!Objects.equals(headersFromFile[i], EXPECTED_HEADERS[i])) {
-                                                JOptionPane.showMessageDialog(Table.this,
-                                                        "Wrong Headers Names",
-                                                        "ERROR",
-                                                        JOptionPane.ERROR_MESSAGE);
-                                                isHeaderValid = false;
-                                                break;
+                                        if (headersFromFile.length != 6) {
+                                            JOptionPane.showMessageDialog(Table.this,
+                                                    "Wrong headers number!",
+                                                    "ERROR",
+                                                    JOptionPane.ERROR_MESSAGE);
+                                            isHeaderValid = false;
+                                        } else {
+                                            for (int i = 0; i < headersFromFile.length; i++) {
+                                                if (!Objects.equals(headersFromFile[i], EXPECTED_HEADERS[i])) {
+                                                    JOptionPane.showMessageDialog(Table.this,
+                                                            "Wrong Headers Names",
+                                                            "ERROR",
+                                                            JOptionPane.ERROR_MESSAGE);
+                                                    isHeaderValid = false;
+                                                    break;
+                                                }
                                             }
                                         }
-                                    }
-                                    if ( !isHeaderValid ){
-                                        break;
                                     } else {
-//                                        todo dalsza część importu
+                                        if (!isHeaderValid) {
+                                            break;
+                                        } else {
+                                            String[] clientDataFfromFile = line.split(",");
+
+                                            Map<String, String> validateMessages = clientService.validateClient(
+                                                    clientDataFfromFile[0],
+                                                    clientDataFfromFile[1],
+                                                    clientDataFfromFile[2],
+                                                    clientDataFfromFile[3],
+                                                    clientDataFfromFile[4],
+                                                    clientDataFfromFile[5]
+                                            );
+                                            if (validateMessages.isEmpty()){
+//                                                todo zrobic zapis klienta do bazy oraz wpis do pliku z logiem o poprawnym imporcie
+                                            } else {
+//                                                todo zapis do pliku z logiem o niepoprawnym imporcie wraz z walidacjami pól.
+                                            }
+
+                                        }
+
                                     }
 
                                 }
