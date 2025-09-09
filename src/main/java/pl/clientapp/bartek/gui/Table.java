@@ -232,18 +232,31 @@ public class Table extends JFrame {
                                         if (!isHeaderValid) {
                                             break;
                                         } else {
-                                            String[] clientDataFfromFile = line.split(",");
+                                            String[] clientDataFromFile = line.split(",");
 
                                             Map<String, String> validateMessages = clientService.validateClient(
-                                                    clientDataFfromFile[0],
-                                                    clientDataFfromFile[1],
-                                                    clientDataFfromFile[2],
-                                                    clientDataFfromFile[3],
-                                                    clientDataFfromFile[4],
-                                                    clientDataFfromFile[5]
+                                                    clientDataFromFile[0],
+                                                    clientDataFromFile[1],
+                                                    clientDataFromFile[2],
+                                                    clientDataFromFile[3],
+                                                    clientDataFromFile[4],
+                                                    clientDataFromFile[5]
                                             );
                                             if (validateMessages.isEmpty()){
-//                                                todo zrobic zapis klienta do bazy oraz wpis do pliku z logiem o poprawnym imporcie
+                                                boolean isClientExist = clientService.clientExists(clientDataFromFile[2], clientDataFromFile[5]);
+                                                    if (isClientExist) {
+//                                                         todo wpisać w plik logu, że klient istnieje
+                                                    } else {
+                                                        boolean clientSaved = clientService.createClient(
+                                                                clientDataFromFile[0],
+                                                                clientDataFromFile[1],
+                                                                clientDataFromFile[2],
+                                                                clientDataFromFile[3],
+                                                                clientDataFromFile[4],
+                                                                clientDataFromFile[5]);
+//                                                         todo zapis do plik logu o poprawnym, lub niepoprawnym zapisie klienta
+                                                    }
+
                                             } else {
 //                                                todo zapis do pliku z logiem o niepoprawnym imporcie wraz z walidacjami pól.
                                             }
