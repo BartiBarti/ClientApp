@@ -3,6 +3,7 @@ package pl.clientapp.bartek.gui;
 import pl.clientapp.bartek.repository.ClientDocumentType;
 import pl.clientapp.bartek.repository.ClientModel;
 import pl.clientapp.bartek.repository.ClientSex;
+import pl.clientapp.bartek.service.ClientFileIOService;
 import pl.clientapp.bartek.service.ClientService;
 
 import javax.swing.*;
@@ -14,10 +15,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -37,7 +35,7 @@ public class Table extends JFrame {
 
     private ClientService clientService = new ClientService();
 
-    private static final String[] EXPECTED_HEADERS = {"FIRST_NAME", "LAST_NAME", "PESEL", "SEX", "DOCUMENT_TYPE", "DOCUMENT_NUMBER"};
+    private ClientFileIOService clientFileIOService = new ClientFileIOService();
 
     public Table() {
         setTitle("Clients table");
@@ -200,52 +198,41 @@ public class Table extends JFrame {
                             JOptionPane.showMessageDialog
                                     (Table.this, "Wrong file Extention", "ERROR", JOptionPane.ERROR_MESSAGE);
                         } else {
+                            int lineCounter = 1;
+
                             try {
                                 BufferedReader reader = new BufferedReader(new FileReader(selectedFile));
                                 String line;
                                 Boolean isHeader = true;
                                 Boolean isHeaderValid = true;
-                                while ((line = reader.readLine()) != null) {
-                                    System.out.println(line);
-                                    if (isHeader) {
-                                        isHeader = false;
-                                        String[] headersFromFile = line.split(",");
-                                        if (headersFromFile.length != 6) {
-                                            JOptionPane.showMessageDialog(Table.this,
-                                                    "Wrong headers number!",
-                                                    "ERROR",
-                                                    JOptionPane.ERROR_MESSAGE);
-                                            isHeaderValid = false;
-                                        } else {
-                                            for (int i = 0; i < headersFromFile.length; i++) {
-                                                if (!Objects.equals(headersFromFile[i], EXPECTED_HEADERS[i])) {
-                                                    JOptionPane.showMessageDialog(Table.this,
-                                                            "Wrong Headers Names",
-                                                            "ERROR",
-                                                            JOptionPane.ERROR_MESSAGE);
-                                                    isHeaderValid = false;
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    } else {
-                                        if (!isHeaderValid) {
-                                            break;
-                                        } else {
-                                            String[] clientDataFromFile = line.split(",");
 
-                                            Map<String, String> validateMessages = clientService.validateClient(
-                                                    clientDataFromFile[0],
-                                                    clientDataFromFile[1],
-                                                    clientDataFromFile[2],
-                                                    clientDataFromFile[3],
-                                                    clientDataFromFile[4],
-                                                    clientDataFromFile[5]
-                                            );
-                                            if (validateMessages.isEmpty()){
-                                                boolean isClientExist = clientService.clientExists(clientDataFromFile[2], clientDataFromFile[5]);
+                                while ((line = reader.readLine()) != null) {
+                                    try {
+
+
+                                        System.out.println(line);
+                                        if (isHeader) {
+                                            isHeader = false;
+                                            isHeaderValid = clientFileIOService.checkHeader(line, table);
+                                        } else {
+                                            if (!isHeaderValid) {
+                                                break;
+                                            } else {
+                                                String[] clientDataFromFile = line.split(",");
+                                                lineCounter++;
+                                                Map<String, String> validateMessages = clientService.validateClient(
+                                                        clientDataFromFile[0],
+                                                        clientDataFromFile[1],
+                                                        clientDataFromFile[2],
+                                                        clientDataFromFile[3],
+                                                        clientDataFromFile[4],
+                                                        clientDataFromFile[5]
+                                                );
+
+                                                if (validateMessages.isEmpty()) {
+                                                    boolean isClientExist = clientService.clientExists(clientDataFromFile[2], clientDataFromFile[5]);
                                                     if (isClientExist) {
-//                                                         todo wpisać w plik logu, że klient istnieje
+                                                        clientFileIOService.writeToSummaryFile(lineCounter + " - Client already exists!");
                                                     } else {
                                                         boolean clientSaved = clientService.createClient(
                                                                 clientDataFromFile[0],
@@ -254,20 +241,30 @@ public class Table extends JFrame {
                                                                 clientDataFromFile[3],
                                                                 clientDataFromFile[4],
                                                                 clientDataFromFile[5]);
-//                                                         todo zapis do plik logu o poprawnym, lub niepoprawnym zapisie klienta
+                                                        if (clientSaved) {
+                                                            clientFileIOService.writeToSummaryFile(lineCounter + " - Client successfully imported!");
+                                                        } else {
+                                                            clientFileIOService.writeToSummaryFile(lineCounter + " - unexpected error occurred!");
+                                                        }
                                                     }
 
-                                            } else {
-//                                                todo zapis do pliku z logiem o niepoprawnym imporcie wraz z walidacjami pól.
+                                                } else {
+                                                    String joindeMessages = clientService.joinMassages(validateMessages);
+                                                    clientFileIOService.writeToSummaryFile(lineCounter + " - " + joindeMessages);
+                                                }
+
                                             }
 
                                         }
-
+                                    } catch (Throwable t) {
+                                        String exeptionMessage = t.getMessage();
+                                        clientFileIOService.writeToSummaryFile(lineCounter + " - " + exeptionMessage);
                                     }
 
                                 }
-                            } catch (IOException ex) {
-                                ex.printStackTrace();
+                            } catch (Throwable t) {
+                                String exeptionMessage = t.getMessage();
+                                clientFileIOService.writeToSummaryFile(lineCounter + " - " + exeptionMessage);
                             }
 
                         }

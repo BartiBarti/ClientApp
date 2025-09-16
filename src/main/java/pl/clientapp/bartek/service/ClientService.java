@@ -165,6 +165,19 @@ public class ClientService {
         }
     }
 
+    public String joinMassages(Map<String, String> validateMessages) {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for (Map.Entry<String, String> entry : validateMessages.entrySet()) {
+
+            stringBuilder.append(entry.getKey()).append(" - ").append(entry.getValue()).append("\n");
+        }
+
+
+        return stringBuilder.toString();
+
+    }
+
     public boolean createClient(String firstName, String lastName, String pesel,
                                 String sex, String documentType, String documentNumber) {
 

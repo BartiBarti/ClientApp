@@ -80,7 +80,7 @@ public class Form extends JFrame {
                 Map<String, String> validateMessages = clientService.validateClient(firstName, lastName, pesel, sex,
                         documentType, documentNumber);
                 if (!validateMessages.isEmpty()) {
-                    String joinedMassages = joinMassages(validateMessages);
+                    String joinedMassages = clientService.joinMassages(validateMessages);
                     JOptionPane.showMessageDialog(Form.this, joinedMassages,
                             "Validation ERROR", JOptionPane.WARNING_MESSAGE);
 
@@ -129,16 +129,5 @@ public class Form extends JFrame {
 
 
 
-    private String joinMassages(Map<String, String> validateMessages) {
-        StringBuilder stringBuilder = new StringBuilder();
 
-        for (Map.Entry<String, String> entry : validateMessages.entrySet()) {
-
-            stringBuilder.append(entry.getKey()).append(" - ").append(entry.getValue()).append("\n");
-        }
-
-
-        return stringBuilder.toString();
-
-    }
 }
