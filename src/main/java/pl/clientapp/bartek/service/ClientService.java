@@ -2,10 +2,7 @@ package pl.clientapp.bartek.service;
 
 
 import org.apache.commons.lang3.StringUtils;
-import pl.clientapp.bartek.repository.ClientDocumentType;
-import pl.clientapp.bartek.repository.ClientModel;
-import pl.clientapp.bartek.repository.ClientRepository;
-import pl.clientapp.bartek.repository.ClientSex;
+import pl.clientapp.bartek.repository.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -94,6 +91,62 @@ public class ClientService {
 
     public void deleteClient(int clientId) {
         clientRepository.deleteClient(clientId);
+    }
+
+    public void deletaAllClients() {
+        clientRepository.deleteAllClients();
+    }
+
+    public Map<ClientSex, Double> calculateClientSexPercent(List<ClientModel> clients){
+        Map<ClientSex, Double> sexPercentMap = new HashMap<>();
+        if (clients == null || clients.isEmpty()) {
+            return sexPercentMap;
+        }
+
+        Integer menClientsNumber = 0;
+        Integer womenClientsNumber = 0;
+
+        for(ClientModel client : clients) {
+            if (client.getSex() == ClientSex.WOMAN) {
+                womenClientsNumber++;
+            } else if (client.getSex() == ClientSex.MAN) {
+                menClientsNumber++;
+            }
+        }
+
+        double allClientsNumber = clients.size();
+        double womenPercent = ((double) womenClientsNumber / allClientsNumber) * 100;
+        double menPercent = ((double) menClientsNumber / allClientsNumber ) * 100;
+
+        sexPercentMap.put(ClientSex.WOMAN, womenPercent);
+        sexPercentMap.put(ClientSex.MAN, menPercent);
+//        todo wyliczenie procentu kobieti mężczyzn (null później usunąć)
+//         tworzymy dwie zmienne Integer przechowująceliczbę dla każdej płci - liczbę kobiet i mężczyzn
+//          przechodzimy w pętli po wszystkich klientach i wyciągamy płeć klienta
+//         w instrukcji warunkowej sprawdzamy, czy klient jest kobietą, czy mężczyzną i inkrementujemy odpowiednią zmienną
+//          (womenCount, albo menCount - przykładowo)
+//           za pętla wyliczamy procent dla płci wg wzoru (womanCount / clients.size *100)
+//          (zachować odpowiednie typy, żeby nie ucieło części dziesiętnej) zrzutowanie zmiennej do doubla
+//          tworzenie mapy gdzie rzucamy dla danej płci wyliczony procent.
+        return sexPercentMap;
+    }
+
+    public Map<ClientAgeRange, Integer> calculateClientsAgeRange(List<ClientModel> clients){
+//        todo wyliczenie ilości klientów w każdym przedziale
+//        utworzyć 3 zmienne w których będziemy przechowywać ilość klientów w każdym przedziale
+//        przechodzimy w pętli po wszystkich klientach
+//        w pętli wyciągamy pesel klienta i ucinamy pierwsze 6 znaków bo tam jest data urodzenia
+//        porównujemy datę urodzenia z dniem dzisiejszym czyli LocalDate.now
+//         w instrukcji warunkowej if sprawdzamy, ile klient ma lat i w którym jest przedziale
+//        inkrementujemy jedną z trzech zmiennych
+//        i na końcu za pętlą tworzymy mapę i wrzucamy odpowiednie wartości
+        return null;
+    }
+
+    public Map<ClientDocumentType, Double> calculateClientsDocuments(List<ClientModel> clients){
+//        todo analogicznie, jak w calculateClientSexPercent, tylko 3 zmienne a nie dwie i wyciągamy typ
+//        dokumentu a nie płeć.
+        return null;
     }
 
     private boolean isDocumentNumberValid(String documentNumber) {

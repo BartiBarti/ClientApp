@@ -1,5 +1,6 @@
 package pl.clientapp.bartek.gui;
 
+import pl.clientapp.bartek.repository.ClientAgeRange;
 import pl.clientapp.bartek.repository.ClientDocumentType;
 import pl.clientapp.bartek.repository.ClientModel;
 import pl.clientapp.bartek.repository.ClientSex;
@@ -144,6 +145,17 @@ public class Table extends JFrame {
                         "DELETED", JOptionPane.INFORMATION_MESSAGE);
                 loadTable(null);
             }
+        }
+    }
+
+    private void deleteAllAction() {
+        int confirmation = JOptionPane.showConfirmDialog(Table.this, "Are you sure, you want to DELETE all clients?",
+                "CONFIRMATION", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+        if (confirmation == JOptionPane.YES_OPTION) {
+            clientService.deletaAllClients();
+            JOptionPane.showMessageDialog(Table.this, "All Clients Deleted!",
+                    "DELETED", JOptionPane.INFORMATION_MESSAGE);
+            loadTable(null);
         }
     }
 
@@ -326,12 +338,19 @@ public class Table extends JFrame {
                 deleteAction();
             }
         });
-        JMenuItem clearAllClients = new JMenuItem("Clear All Clients");
-        clearAllClients.setPreferredSize(new Dimension(150, 30));
+        JMenuItem clearAllClientsMenuItem = new JMenuItem("Clear All Clients");
+        clearAllClientsMenuItem.setPreferredSize(new Dimension(150, 30));
+
+        clearAllClientsMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                deleteAllAction();
+            }
+        });
         editMenu.add(addClientMenuItem);
         editMenu.add(editSelectedMenuItem);
         editMenu.add(deleteSelectedMenuItem);
-        editMenu.add(clearAllClients);
+        editMenu.add(clearAllClientsMenuItem);
         jMenuBar.add(editMenu);
 
         JMenu viewMenu = new JMenu("View");
@@ -340,6 +359,25 @@ public class Table extends JFrame {
         sortClientsMenuItem.setPreferredSize(new Dimension(150, 30));
         JMenuItem showStatisticsMenuItem = new JMenuItem("Show Statistics");
         showStatisticsMenuItem.setPreferredSize(new Dimension(150, 30));
+
+        showStatisticsMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+//                todo - wywołanie metody liczącej statystyki
+               List<ClientModel> clients = clientService.getAllClients();
+               Map<ClientSex, Double> clientSexPercentMap = clientService.calculateClientSexPercent(clients);
+               Map<ClientAgeRange, Integer> clientAgeRangeMap = clientService.calculateClientsAgeRange(clients);
+               Map<ClientDocumentType, Double> clientDocumentTypeMap = clientService.calculateClientsDocuments(clients);
+//               todo na podstawie tych 3 Map utworzyć końcowe podsumowanie, które się wyświetli w nowym JFrame, czyli okienku
+//                analogicznie do okna About
+                JFrame sexStatisticsFrame = new JFrame( "Sex statistic");
+                sexStatisticsFrame.setLayout(new FlowLayout());
+                JLabel sexTitleLabel = new JLabel( calculateClientSexPercent, SwingConstants.CENTER);
+                sexTitleLabel.setFont(new Font("Arial", Font.BOLD, 15));
+                sexStatisticsFrame.add(sexTitleLabel);
+            }
+        });
+
         viewMenu.add(sortClientsMenuItem);
         viewMenu.add(showStatisticsMenuItem);
         jMenuBar.add(viewMenu);

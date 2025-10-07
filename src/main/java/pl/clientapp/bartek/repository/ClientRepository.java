@@ -14,8 +14,10 @@ public class ClientRepository {
     public ClientRepository() {
 
         try {
-            DriverManager.registerDriver(new Driver());
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/clientsdb?serverTimezone=UTC", "root", "");
+//            DriverManager.registerDriver(new Driver());
+//            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/clientsdb?serverTimezone=UTC", "root", "");
+            connection = DriverManager.getConnection("jdbc:sqlite:client.db");
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -169,16 +171,23 @@ public class ClientRepository {
     public void deleteClient(int clientId) {
 
         try {
-
             Statement statement = connection.createStatement();
             String query = "delete from clients where ID = %d";
             String filledQuery = String.format(query, clientId);
             statement.executeUpdate(filledQuery);
-
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
 
+    public void deleteAllClients(){
+        try {
+            Statement statement = connection.createStatement();
+            String query = "delete from clients;";
+            statement.executeUpdate(query);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public boolean updateClient(ClientModel client) {
