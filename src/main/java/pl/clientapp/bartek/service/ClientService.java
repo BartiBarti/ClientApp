@@ -4,6 +4,8 @@ package pl.clientapp.bartek.service;
 import org.apache.commons.lang3.StringUtils;
 import pl.clientapp.bartek.repository.*;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +25,7 @@ public class ClientService {
 
         if (StringUtils.isBlank(firstName)) {
             validateMessages.put("First Name", "Field Required!");
-        }   else if (!firstName.matches("\\p{L}+")) {
+        } else if (!firstName.matches("\\p{L}+")) {
             validateMessages.put("First Name", "Only letters");
         }
 
@@ -52,11 +54,11 @@ public class ClientService {
             documentNumber = documentNumber.toUpperCase();
             ClientDocumentType clientDocumentType = ClientDocumentType.valueFromGuiKey(documentType);
 
-            if (ClientDocumentType.IDENTITY_CARD.equals(clientDocumentType)){
+            if (ClientDocumentType.IDENTITY_CARD.equals(clientDocumentType)) {
 
                 if (documentNumber.matches("[A-Z]{3}\\d{6}")) {
 
-                    if (!isDocumentNumberValid(documentNumber)){
+                    if (!isDocumentNumberValid(documentNumber)) {
                         validateMessages.put("Document number", "Wrong control sum!");
                     }
                 } else {
@@ -67,7 +69,7 @@ public class ClientService {
             }
         }
 
-        if (StringUtils.isBlank(sex)){
+        if (StringUtils.isBlank(sex)) {
             validateMessages.put("Sex", "One option required");
         } else {
             ClientSex clientSex = ClientSex.valueFromGuiKey(sex);
@@ -81,11 +83,11 @@ public class ClientService {
 
     }
 
-    public boolean updateClient(ClientModel client){
+    public boolean updateClient(ClientModel client) {
         return clientRepository.updateClient(client);
     }
 
-    public boolean clientExists(String pesel, String documentNumber){
+    public boolean clientExists(String pesel, String documentNumber) {
         return clientRepository.clientExist(pesel, documentNumber);
     }
 
@@ -97,27 +99,55 @@ public class ClientService {
         clientRepository.deleteAllClients();
     }
 
-    public Map<ClientSex, Double> calculateClientSexPercent(List<ClientModel> clients){
+    public Map<ClientDocumentType, Double> calculateClientsDocuments(List<ClientModel> clients) {
+//        todo analogicznie, jak w calculateClientSexPercent, tylko 3 zmienne a nie dwie i wyciągamy typ
+//        dokumentu a nie płeć.
+        Map<ClientDocumentType, Double> documentTypeMap = new HashMap<>();
+        if (clients == null || clients.isEmpty()) {
+            return documentTypeMap;
+        }
+        int identityCardOwnerNumber = 0;
+        int passportOwnerNumber = 0;
+        int driverLicenceOwner = 0;
+        for (ClientModel client : clients) {
+            if (client.getDocumentType() == ClientDocumentType.IDENTITY_CARD) {
+                identityCardOwnerNumber++;
+            } else if (client.getDocumentType() == ClientDocumentType.PASSPORT) {
+                passportOwnerNumber++;
+            } else if (client.getDocumentType() == ClientDocumentType.DRIVER_LICENCE) {
+                driverLicenceOwner++;
+            }
+        }
+        int allClientsNumber = clients.size();
+
+        double identityCardOwnerPercent = ((double) identityCardOwnerNumber / allClientsNumber) * 100;
+        double passportOwnerPercent = ((double) passportOwnerNumber / allClientsNumber) * 100;
+        double driverLicenceOwnerPercent = ((double) driverLicenceOwner / allClientsNumber) * 100;
+
+        documentTypeMap.put(ClientDocumentType.IDENTITY_CARD, identityCardOwnerPercent);
+        documentTypeMap.put(ClientDocumentType.PASSPORT, passportOwnerPercent);
+        documentTypeMap.put(ClientDocumentType.DRIVER_LICENCE, driverLicenceOwnerPercent);
+
+        return documentTypeMap;
+    }
+
+    public Map<ClientSex, Double> calculateClientSexPercent(List<ClientModel> clients) {
         Map<ClientSex, Double> sexPercentMap = new HashMap<>();
         if (clients == null || clients.isEmpty()) {
             return sexPercentMap;
         }
-
-        Integer menClientsNumber = 0;
-        Integer womenClientsNumber = 0;
-
-        for(ClientModel client : clients) {
+        int menClientsNumber = 0;
+        int womenClientsNumber = 0;
+        for (ClientModel client : clients) {
             if (client.getSex() == ClientSex.WOMAN) {
                 womenClientsNumber++;
             } else if (client.getSex() == ClientSex.MAN) {
                 menClientsNumber++;
             }
         }
-
-        double allClientsNumber = clients.size();
+        int allClientsNumber = clients.size();
         double womenPercent = ((double) womenClientsNumber / allClientsNumber) * 100;
-        double menPercent = ((double) menClientsNumber / allClientsNumber ) * 100;
-
+        double menPercent = ((double) menClientsNumber / allClientsNumber) * 100;
         sexPercentMap.put(ClientSex.WOMAN, womenPercent);
         sexPercentMap.put(ClientSex.MAN, menPercent);
 //        todo wyliczenie procentu kobieti mężczyzn (null później usunąć)
@@ -131,7 +161,7 @@ public class ClientService {
         return sexPercentMap;
     }
 
-    public Map<ClientAgeRange, Integer> calculateClientsAgeRange(List<ClientModel> clients){
+
 //        todo wyliczenie ilości klientów w każdym przedziale
 //        utworzyć 3 zmienne w których będziemy przechowywać ilość klientów w każdym przedziale
 //        przechodzimy w pętli po wszystkich klientach
@@ -140,13 +170,62 @@ public class ClientService {
 //         w instrukcji warunkowej if sprawdzamy, ile klient ma lat i w którym jest przedziale
 //        inkrementujemy jedną z trzech zmiennych
 //        i na końcu za pętlą tworzymy mapę i wrzucamy odpowiednie wartości
-        return null;
-    }
 
-    public Map<ClientDocumentType, Double> calculateClientsDocuments(List<ClientModel> clients){
-//        todo analogicznie, jak w calculateClientSexPercent, tylko 3 zmienne a nie dwie i wyciągamy typ
-//        dokumentu a nie płeć.
-        return null;
+
+    public Map<ClientAgeRange, Integer> calculateClientsAgeRange(List<ClientModel> clients) {
+        Map<ClientAgeRange, Integer> ageRangeMap = new HashMap<>();
+
+        if (clients == null || clients.isEmpty()) {
+            return ageRangeMap;
+        }
+
+        int clients1To25 = 0;
+        int clients26To50 = 0;
+        int clientsOver50 = 0;
+
+        for (ClientModel client : clients) {
+            String pesel = client.getPesel();
+
+            int year = Integer.parseInt(pesel.substring(0, 2));
+            int month = Integer.parseInt(pesel.substring(2, 4));
+            int day = Integer.parseInt(pesel.substring(4, 6));
+
+            // PESEL ma zakodowany wiek stulecia w miesiącu
+            if (month > 80) { // 1800–1899
+                year += 1800;
+                month -= 80;
+            } else if (month > 60) { // 2200–2299
+                year += 2200;
+                month -= 60;
+            } else if (month > 40) { // 2100–2199
+                year += 2100;
+                month -= 40;
+            } else if (month > 20) { // 2000–2099
+                year += 2000;
+                month -= 20;
+            } else { // 1900–1999
+                year += 1900;
+            }
+
+            LocalDate birthDate = LocalDate.of(year, month, day);
+            int age = Period.between(birthDate, LocalDate.now()).getYears();
+
+            // sprawdzamy przedział wiekowy
+            if (age <= 25) {
+                clients1To25++;
+            } else if (age <= 50) {
+                clients26To50++;
+            } else {
+                clientsOver50++;
+            }
+        }
+
+        // wrzucamy wyniki do mapy
+        ageRangeMap.put(ClientAgeRange.RANGE_1_25, clients1To25);
+        ageRangeMap.put(ClientAgeRange.RANGE_26_50, clients26To50);
+        ageRangeMap.put(ClientAgeRange.RANGE_51_150, clientsOver50);
+
+        return ageRangeMap;
     }
 
     private boolean isDocumentNumberValid(String documentNumber) {
@@ -174,32 +253,36 @@ public class ClientService {
         return controlDigit == 0;
     }
 
-    public List<ClientModel> getAllClients (){
+    public List<ClientModel> getAllClients() {
         return clientRepository.findAllClients();
     }
 
-    public List<ClientModel> getClientByString (String searchText){
+    public List<ClientModel> getAllClientsOrderBy(ClientSortBy clientSortBy) {
+        return clientRepository.findAllClientsOrderBy(clientSortBy);
+    }
+
+    public List<ClientModel> getClientByString(String searchText) {
         return clientRepository.findClientsByString(searchText);
 
     }
 
     private boolean validatePeselControlNumber(String pesel) {
 
-        int sum = 1 * Integer.parseInt(pesel.substring(0,1)) +
-                3 * Integer.parseInt(pesel.substring(1,2))+
-                7 * Integer.parseInt(pesel.substring(2,3))+
-                9 * Integer.parseInt(pesel.substring(3,4))+
-                1 * Integer.parseInt(pesel.substring(4,5))+
-                3 * Integer.parseInt(pesel.substring(5,6))+
-                7 * Integer.parseInt(pesel.substring(6,7))+
-                9 * Integer.parseInt(pesel.substring(7,8))+
-                1 * Integer.parseInt(pesel.substring(8,9))+
-                3 * Integer.parseInt(pesel.substring(9,10));
+        int sum = 1 * Integer.parseInt(pesel.substring(0, 1)) +
+                3 * Integer.parseInt(pesel.substring(1, 2)) +
+                7 * Integer.parseInt(pesel.substring(2, 3)) +
+                9 * Integer.parseInt(pesel.substring(3, 4)) +
+                1 * Integer.parseInt(pesel.substring(4, 5)) +
+                3 * Integer.parseInt(pesel.substring(5, 6)) +
+                7 * Integer.parseInt(pesel.substring(6, 7)) +
+                9 * Integer.parseInt(pesel.substring(7, 8)) +
+                1 * Integer.parseInt(pesel.substring(8, 9)) +
+                3 * Integer.parseInt(pesel.substring(9, 10));
         sum %= 10; // to samo co sum = sum % 10
         sum = 10 - sum;
         sum %= 10;
 
-        if (sum == Integer.parseInt(pesel.substring(10,11))) {
+        if (sum == Integer.parseInt(pesel.substring(10, 11))) {
             return true;
 
         } else {
@@ -210,7 +293,7 @@ public class ClientService {
 
     private ClientSex validateClientSex(String pesel) {
 
-        int sexNumber = Integer.parseInt((pesel.substring(9,10)));
+        int sexNumber = Integer.parseInt((pesel.substring(9, 10)));
         if (sexNumber % 2 == 0) {
             return ClientSex.WOMAN;
         } else {

@@ -1,9 +1,6 @@
 package pl.clientapp.bartek.gui;
 
-import pl.clientapp.bartek.repository.ClientAgeRange;
-import pl.clientapp.bartek.repository.ClientDocumentType;
-import pl.clientapp.bartek.repository.ClientModel;
-import pl.clientapp.bartek.repository.ClientSex;
+import pl.clientapp.bartek.repository.*;
 import pl.clientapp.bartek.service.ClientFileIOService;
 import pl.clientapp.bartek.service.ClientService;
 
@@ -12,14 +9,10 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.io.*;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class Table extends JFrame {
     private JLabel searchLabel;
@@ -31,6 +24,9 @@ public class Table extends JFrame {
     private JButton addButton;
     private JPanel mainPanel;
     private JButton refreshButton;
+    private JLabel sortByJLabel;
+    private JComboBox sortByColumnComboBox;
+    private JComboBox orderTypeComboBox;
 
     private static Table table;
 
@@ -89,7 +85,6 @@ public class Table extends JFrame {
             }
         });
 
-
         searchTextField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -103,7 +98,34 @@ public class Table extends JFrame {
             }
         });
 
+        sortByColumnComboBox.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    String valueSortByColumnFromComboBox = (String) e.getItem();
+                    String valueOrderTypeFromComboBox = (String) orderTypeComboBox.getSelectedItem();
+                    ClientSortBy clientSortBy = ClientSortBy.valueFromGuiKeyAndOrderType(valueSortByColumnFromComboBox, valueOrderTypeFromComboBox);
+                    List<ClientModel> sortedClients = clientService.getAllClientsOrderBy(clientSortBy);
+                    loadTable(sortedClients);
+                }
+            }
+        });
+
+        orderTypeComboBox.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    String valueOrderTypeFromComboBox = (String) e.getItem();
+                    String valueSortByColumnFromComboBox = (String) sortByColumnComboBox.getSelectedItem();
+                    ClientSortBy clientSortBy = ClientSortBy.valueFromGuiKeyAndOrderType(valueSortByColumnFromComboBox, valueOrderTypeFromComboBox);
+                    List<ClientModel> sortedClients = clientService.getAllClientsOrderBy(clientSortBy);
+                    loadTable(sortedClients);
+                }
+            }
+        });
+
     }
+
 
     private void editClientAction() {
         int selectedRow = clientsTable.getSelectedRow();
@@ -355,30 +377,21 @@ public class Table extends JFrame {
 
         JMenu viewMenu = new JMenu("View");
 
-        JMenuItem sortClientsMenuItem = new JMenuItem("Sort Clients");
-        sortClientsMenuItem.setPreferredSize(new Dimension(150, 30));
         JMenuItem showStatisticsMenuItem = new JMenuItem("Show Statistics");
         showStatisticsMenuItem.setPreferredSize(new Dimension(150, 30));
 
         showStatisticsMenuItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-//                todo - wywołanie metody liczącej statystyki
-               List<ClientModel> clients = clientService.getAllClients();
-               Map<ClientSex, Double> clientSexPercentMap = clientService.calculateClientSexPercent(clients);
-               Map<ClientAgeRange, Integer> clientAgeRangeMap = clientService.calculateClientsAgeRange(clients);
-               Map<ClientDocumentType, Double> clientDocumentTypeMap = clientService.calculateClientsDocuments(clients);
-//               todo na podstawie tych 3 Map utworzyć końcowe podsumowanie, które się wyświetli w nowym JFrame, czyli okienku
-//                analogicznie do okna About
-                JFrame sexStatisticsFrame = new JFrame( "Sex statistic");
-                sexStatisticsFrame.setLayout(new FlowLayout());
-                JLabel sexTitleLabel = new JLabel( calculateClientSexPercent, SwingConstants.CENTER);
-                sexTitleLabel.setFont(new Font("Arial", Font.BOLD, 15));
-                sexStatisticsFrame.add(sexTitleLabel);
+
+                List<ClientModel> clients = clientService.getAllClients();
+                Map<ClientSex, Double> clientSexPercentMap = clientService.calculateClientSexPercent(clients);
+                Map<ClientAgeRange, Integer> clientAgeRangeMap = clientService.calculateClientsAgeRange(clients);
+                Map<ClientDocumentType, Double> clientDocumentTypeMap = clientService.calculateClientsDocuments(clients);
+                showAllStatistics(clientSexPercentMap, clientAgeRangeMap, clientDocumentTypeMap);
             }
         });
 
-        viewMenu.add(sortClientsMenuItem);
         viewMenu.add(showStatisticsMenuItem);
         jMenuBar.add(viewMenu);
 
@@ -454,6 +467,78 @@ public class Table extends JFrame {
         setJMenuBar(jMenuBar);
 
     }
+
+    private String getSexStatisticsDescription(Map<ClientSex, Double> sexPercentMap) {
+
+        double menPercent = sexPercentMap.get(ClientSex.MAN);
+        double womenPercent = sexPercentMap.get(ClientSex.WOMAN);
+
+        return String.format("Statystyka płci: Mężczyźni - %.2f%%, Kobiety - %.2f%%", menPercent, womenPercent);
+
+    }
+
+    private String getAgeStatisticsDescription(Map<ClientAgeRange, Integer> ageRangeMap) {
+
+        int clients1To25 = ageRangeMap.get(ClientAgeRange.RANGE_1_25);
+        int clients26To50 = ageRangeMap.get(ClientAgeRange.RANGE_26_50);
+        int clientsOver50 = ageRangeMap.get(ClientAgeRange.RANGE_51_150);
+
+        return "Liczba klientów w przedziale do 25 lat to " + clients1To25
+                + "<br/> Liczba klientów w przedzial od 26 do 50 to " + clients26To50
+                + "<br/> Liczba klientów w przedziale powyżej 50 to" + clientsOver50;
+
+    }
+
+    private String getDocumentsTypeStatisticsDescrption(Map<ClientDocumentType, Double> documentPercentMap) {
+//        todo stworzyć opis dla typów dokumentów
+        return null;
+
+    }
+
+    private void showAllStatistics(Map<ClientSex, Double> sexPercentMap,
+                                   Map<ClientAgeRange, Integer> ageRangeMap,
+                                   Map<ClientDocumentType, Double> documentPercentMap) {
+
+
+//        todo na podstawie tych 3 Map utworzyć końcowe podsumowanie, które się wyświetli w nowym JFrame, czyli okienku
+//                analogicznie do okna About
+        JFrame statisticsFrame = new JFrame("Statistics");
+        statisticsFrame.setLayout(new FlowLayout());
+
+        statisticsFrame.setSize(600, 300);
+        statisticsFrame.setLocationRelativeTo(null);
+        statisticsFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Zamknięcie tylko tego okna
+        statisticsFrame.setResizable(false); // maksymalizacja okna wyłączona
+        statisticsFrame.setVisible(true);
+
+        String showSexStatistics = getSexStatisticsDescription(sexPercentMap);
+        String showAgeStatistics = getAgeStatisticsDescription(ageRangeMap);
+        String showDocumentsStatistics = getDocumentsTypeStatisticsDescrption(documentPercentMap);
+
+        JLabel statisticsTitleLabel = new JLabel("<html>" +
+                "<center>Statystyki klientów<br/>" +
+                "</center></html>", SwingConstants.CENTER);
+        statisticsTitleLabel.setFont(new Font("Arial", Font.BOLD, 15));
+        statisticsFrame.add(statisticsTitleLabel);
+
+        JLabel statisticsDescriptionLabel = new JLabel("<html>" +
+                "<center>" +
+                showSexStatistics + "<br/>" +
+                showAgeStatistics + "<br/>" +
+                showDocumentsStatistics +
+                "</center></html>", SwingConstants.CENTER);
+        statisticsDescriptionLabel.setFont(new Font("Times New Roman", Font.PLAIN, 14));
+        statisticsFrame.add(statisticsDescriptionLabel);
+
+    }
+
+//    JLabel aboutTitleLabel = new JLabel("<html>" +
+//            "<center>Aplikacja bazodanowa klientów<br/>" +
+//            "Mateusz & Bartek Software House<br/>" +
+//            "</center></html>", SwingConstants.CENTER);
+//                aboutTitleLabel.setFont(new Font("Arial", Font.BOLD, 15));
+//                aboutFrame.add(aboutTitleLabel);
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {

@@ -40,16 +40,39 @@ public class ClientRepository {
         return clientsList;
     }
 
-    public List<ClientModel> findClientsByString(String searchText){
+    public List<ClientModel> findAllClientsOrderBy(ClientSortBy clientSortBy) {
+
+        String columnNameOrderBy = clientSortBy.getDbColumnName();
+        String orderType = clientSortBy.getDbOrderType();
+
+        List<ClientModel> clientsList = new ArrayList<>();
+
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("select * from clients order by "
+                    + columnNameOrderBy + " " + orderType + ";");
+            while (resultSet.next()) {
+                ClientModel client = getClientFromResultSet(resultSet);
+                clientsList.add(client);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return clientsList;
+    }
+
+    public List<ClientModel> findClientsByString(String searchText) {
 
         List<ClientModel> clientsList = new ArrayList<>();
 
         try {
             Statement statement = connection.createStatement();
             String query = "select * from clients c where c.FirstName like '%?%' " +
-                                                    "or c.LastName like '%?%' " +
-                                                    "or c.Pesel like '%?%' " +
-                                                    "or c.DocumentNumber like '%?%';";
+                    "or c.LastName like '%?%' " +
+                    "or c.Pesel like '%?%' " +
+                    "or c.DocumentNumber like '%?%';";
             query = query.replaceAll("\\?", searchText);
             ResultSet resultSet = statement.executeQuery(query);
             while (resultSet.next()) {
@@ -94,7 +117,6 @@ public class ClientRepository {
 //    }
 
 
-
     public ClientModel findClientById(int id) {
 
         try {
@@ -112,14 +134,14 @@ public class ClientRepository {
         return null;
     }
 
-    public boolean clientExist(String pesel, String documentNumber){
+    public boolean clientExist(String pesel, String documentNumber) {
 //        select * from clients c where c.Pesel = 99120345678 or c.DocumentNumber = 1234;
         try {
             Statement statement = connection.createStatement();
-            String query =  "select * from clients c where c.Pesel = '%s' or c.DocumentNumber = '%s';";
+            String query = "select * from clients c where c.Pesel = '%s' or c.DocumentNumber = '%s';";
             String filledQuery = String.format(query, pesel, documentNumber);
             ResultSet resultSet = statement.executeQuery(filledQuery);
-            return  resultSet.next();
+            return resultSet.next();
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -180,7 +202,7 @@ public class ClientRepository {
         }
     }
 
-    public void deleteAllClients(){
+    public void deleteAllClients() {
         try {
             Statement statement = connection.createStatement();
             String query = "delete from clients;";
@@ -216,19 +238,16 @@ public class ClientRepository {
             }
 
 
-
             query = query.substring(0, query.length() - 2);
             query = query + " where ID = " + client.getId();
             statement.executeUpdate(query);
 
         } catch (SQLException e) {
-             e.printStackTrace();
+            e.printStackTrace();
             return false;
         }
         return true;
     }
-
-
 
 
 }

@@ -23,8 +23,6 @@ public enum ClientDocumentType {
                 return documentType;
             }
         }
-
         return null;
-
     }
 }
