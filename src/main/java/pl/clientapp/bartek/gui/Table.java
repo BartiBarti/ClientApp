@@ -308,8 +308,17 @@ public class Table extends JFrame {
                 }
             }
         });
+
         JMenuItem exportMenuItem = new JMenuItem("Export");
         exportMenuItem.setPreferredSize(new Dimension(150, 30));
+        exportMenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            List<ClientModel> clients = clientService.getAllClients();
+            clientFileIOService.exportClients(clients);
+            }
+        });
+
         JMenuItem closeMenuItem = new JMenuItem("Close");
         closeMenuItem.setPreferredSize(new Dimension(150, 30));
         closeMenuItem.setAccelerator(KeyStroke.getKeyStroke("control Q"));
@@ -490,7 +499,14 @@ public class Table extends JFrame {
     }
 
     private String getDocumentsTypeStatisticsDescrption(Map<ClientDocumentType, Double> documentPercentMap) {
-//        todo stworzyć opis dla typów dokumentów
+
+
+        double passportOwners = documentPercentMap.get(ClientDocumentType.PASSPORT);
+        double drivingLicenceOwners = documentPercentMap.get(ClientDocumentType.DRIVER_LICENCE);
+        double identityCardOwners = documentPercentMap.get(ClientDocumentType.DRIVER_LICENCE);
+
+        //        todo stworzyć opis dla typów dokumentów - dokończyć Stringa w return który teraZ JEST NULLEM
+
         return null;
 
     }

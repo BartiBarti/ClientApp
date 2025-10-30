@@ -1,11 +1,17 @@
 package pl.clientapp.bartek.service;
 
 import pl.clientapp.bartek.gui.Table;
+import pl.clientapp.bartek.repository.ClientDocumentType;
+import pl.clientapp.bartek.repository.ClientModel;
+import pl.clientapp.bartek.repository.ClientSex;
 
 import javax.swing.*;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Objects;
 
 public class ClientFileIOService {
@@ -51,7 +57,56 @@ public class ClientFileIOService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void exportClients(List<ClientModel> clients){
+
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+        String formattedDateTime = now.format(dateTimeFormatter);
+        String fileName = "ExportedClients_" + formattedDateTime + ".csv";
+        try {
+            FileWriter fileWriter = new FileWriter(fileName);
+            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+            String headersLine = joinHeadersWithComaSeparator();
+            bufferedWriter.write(headersLine);
+            bufferedWriter.newLine();
+            for (int i = 0; i < clients.size(); i++) {
+                ClientModel client = clients.get(i);
+                String firstName = client.getFirstName();
+                String lastName = client.getLastName();
+                String pesel = client.getPesel();
+                ClientSex sex = client.getSex();
+                ClientDocumentType document = client.getDocumentType();
+                String documentNumber = client.getDocumentNumber();
+                String clientLine = firstName + "," + lastName + "," + pesel + "," + sex + "," + document + "," + documentNumber;
+                bufferedWriter.write(clientLine);
+                bufferedWriter.newLine();
 
 
+            }
+
+            bufferedWriter.close();
+            fileWriter.close();
+
+
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    private String joinHeadersWithComaSeparator(){
+
+        String joinedHeaders = "";
+        for (int i = 0; i < EXPECTED_HEADERS.length; i++) {
+            String header = EXPECTED_HEADERS[i];
+//            joinedHeaders = joinedHeaders + header + ","; poniżej wersja skrócona
+            joinedHeaders += header + ",";
+        }
+
+
+        return joinedHeaders.substring(0, joinedHeaders.length() - 1);
     }
 }
