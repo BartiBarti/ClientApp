@@ -100,8 +100,7 @@ public class ClientService {
     }
 
     public Map<ClientDocumentType, Double> calculateClientsDocuments(List<ClientModel> clients) {
-//        todo analogicznie, jak w calculateClientSexPercent, tylko 3 zmienne a nie dwie i wyciągamy typ
-//        dokumentu a nie płeć.
+
         Map<ClientDocumentType, Double> documentTypeMap = new HashMap<>();
         if (clients == null || clients.isEmpty()) {
             return documentTypeMap;
@@ -150,7 +149,7 @@ public class ClientService {
         double menPercent = ((double) menClientsNumber / allClientsNumber) * 100;
         sexPercentMap.put(ClientSex.WOMAN, womenPercent);
         sexPercentMap.put(ClientSex.MAN, menPercent);
-//        todo wyliczenie procentu kobieti mężczyzn (null później usunąć)
+//        wyliczenie procentu kobieti mężczyzn (null później usunąć)
 //         tworzymy dwie zmienne Integer przechowująceliczbę dla każdej płci - liczbę kobiet i mężczyzn
 //          przechodzimy w pętli po wszystkich klientach i wyciągamy płeć klienta
 //         w instrukcji warunkowej sprawdzamy, czy klient jest kobietą, czy mężczyzną i inkrementujemy odpowiednią zmienną
@@ -162,7 +161,7 @@ public class ClientService {
     }
 
 
-//        todo wyliczenie ilości klientów w każdym przedziale
+//        wyliczenie ilości klientów w każdym przedziale
 //        utworzyć 3 zmienne w których będziemy przechowywać ilość klientów w każdym przedziale
 //        przechodzimy w pętli po wszystkich klientach
 //        w pętli wyciągamy pesel klienta i ucinamy pierwsze 6 znaków bo tam jest data urodzenia

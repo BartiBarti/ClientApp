@@ -494,7 +494,7 @@ public class Table extends JFrame {
 
         return "Liczba klientów w przedziale do 25 lat to " + clients1To25
                 + "<br/> Liczba klientów w przedzial od 26 do 50 to " + clients26To50
-                + "<br/> Liczba klientów w przedziale powyżej 50 to" + clientsOver50;
+                + "<br/> Liczba klientów w przedziale powyżej 50 to " + clientsOver50;
 
     }
 
@@ -503,11 +503,12 @@ public class Table extends JFrame {
 
         double passportOwners = documentPercentMap.get(ClientDocumentType.PASSPORT);
         double drivingLicenceOwners = documentPercentMap.get(ClientDocumentType.DRIVER_LICENCE);
-        double identityCardOwners = documentPercentMap.get(ClientDocumentType.DRIVER_LICENCE);
+        double identityCardOwners = documentPercentMap.get(ClientDocumentType.IDENTITY_CARD);
 
-        //        todo stworzyć opis dla typów dokumentów - dokończyć Stringa w return który teraZ JEST NULLEM
 
-        return null;
+        return "Liczba klientów posługujących sie paszportem to: " + passportOwners
+                + "<br/> Liczba klientów posługujących się prawem jazdy to: " + drivingLicenceOwners
+                + "<br/> Liczba klientów posługujących się dowodem osobistym to: " + identityCardOwners;
 
     }
 
@@ -516,12 +517,10 @@ public class Table extends JFrame {
                                    Map<ClientDocumentType, Double> documentPercentMap) {
 
 
-//        todo na podstawie tych 3 Map utworzyć końcowe podsumowanie, które się wyświetli w nowym JFrame, czyli okienku
-//                analogicznie do okna About
         JFrame statisticsFrame = new JFrame("Statistics");
         statisticsFrame.setLayout(new FlowLayout());
 
-        statisticsFrame.setSize(600, 300);
+        statisticsFrame.setSize(600, 500);
         statisticsFrame.setLocationRelativeTo(null);
         statisticsFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Zamknięcie tylko tego okna
         statisticsFrame.setResizable(false); // maksymalizacja okna wyłączona
@@ -530,6 +529,10 @@ public class Table extends JFrame {
         String showSexStatistics = getSexStatisticsDescription(sexPercentMap);
         String showAgeStatistics = getAgeStatisticsDescription(ageRangeMap);
         String showDocumentsStatistics = getDocumentsTypeStatisticsDescrption(documentPercentMap);
+
+        statisticsFrame.setLayout(new GridLayout(2, 1));
+
+//        todo zmienić opisy na angielskie
 
         JLabel statisticsTitleLabel = new JLabel("<html>" +
                 "<center>Statystyki klientów<br/>" +
