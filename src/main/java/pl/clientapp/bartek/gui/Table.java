@@ -414,14 +414,14 @@ public class Table extends JFrame {
                 aboutFrame.setLayout(new FlowLayout());
 
                 JLabel aboutTitleLabel = new JLabel("<html>" +
-                        "<center>Aplikacja bazodanowa klientów<br/>" +
+                        "<center>Database of clients aplication<br/>" +
                         "Mateusz & Bartek Software House<br/>" +
                         "</center></html>", SwingConstants.CENTER);
                 aboutTitleLabel.setFont(new Font("Arial", Font.BOLD, 15));
                 aboutFrame.add(aboutTitleLabel);
 
                 JLabel aboutDescriptionLabel = new JLabel("<html>" +
-                        "<center>Program do obsługi bazy danych klientów firmy<br/>" +
+                        "<center>Application for storing clients data<br/>" +
                         "Version 1.0<br/>" +
                         "© 07.2025</center></html>", SwingConstants.CENTER);
                 aboutDescriptionLabel.setFont(new Font("Times New Roman", Font.PLAIN, 14));
@@ -433,8 +433,6 @@ public class Table extends JFrame {
                 aboutFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Zamknięcie tylko tego okna
                 aboutFrame.setResizable(false); // maksymalizacja okna wyłączona
                 aboutFrame.setVisible(true);
-                System.out.println("About - otwarcie okna");
-
 
 //                JOptionPane.showMessageDialog(null,
 //                        "<html><center>Aplikacja bazodanowa klientów<br/>Version 1.0<br/>© 2025</center></html>", "About",
@@ -482,7 +480,7 @@ public class Table extends JFrame {
         double menPercent = sexPercentMap.get(ClientSex.MAN);
         double womenPercent = sexPercentMap.get(ClientSex.WOMAN);
 
-        return String.format("Statystyka płci: Mężczyźni - %.2f%%, Kobiety - %.2f%%", menPercent, womenPercent);
+        return String.format("Sex statistics: Men - %.2f%% , Women - %.2f%%.", menPercent, womenPercent);
 
     }
 
@@ -492,9 +490,9 @@ public class Table extends JFrame {
         int clients26To50 = ageRangeMap.get(ClientAgeRange.RANGE_26_50);
         int clientsOver50 = ageRangeMap.get(ClientAgeRange.RANGE_51_150);
 
-        return "Liczba klientów w przedziale do 25 lat to " + clients1To25
-                + "<br/> Liczba klientów w przedzial od 26 do 50 to " + clients26To50
-                + "<br/> Liczba klientów w przedziale powyżej 50 to " + clientsOver50;
+        return "Number of clients before 25 years old is: " + clients1To25
+                + "<br/>Number of clients between 26 and 50 years old is: " + clients26To50
+                + "<br/>Number of clients after 50 years old is: " + clientsOver50;
 
     }
 
@@ -506,9 +504,9 @@ public class Table extends JFrame {
         double identityCardOwners = documentPercentMap.get(ClientDocumentType.IDENTITY_CARD);
 
 
-        return "Liczba klientów posługujących sie paszportem to: " + passportOwners
-                + "<br/> Liczba klientów posługujących się prawem jazdy to: " + drivingLicenceOwners
-                + "<br/> Liczba klientów posługujących się dowodem osobistym to: " + identityCardOwners;
+        return "Percent of clients who use passport is: " + passportOwners
+                + "<br/>Percent of clients who use driving licence is: " + drivingLicenceOwners
+                + "<br/>Percent of clients who use identity card is: " + identityCardOwners;
 
     }
 
@@ -532,10 +530,8 @@ public class Table extends JFrame {
 
         statisticsFrame.setLayout(new GridLayout(2, 1));
 
-//        todo zmienić opisy na angielskie
-
         JLabel statisticsTitleLabel = new JLabel("<html>" +
-                "<center>Statystyki klientów<br/>" +
+                "<center>Clients statistics<br/>" +
                 "</center></html>", SwingConstants.CENTER);
         statisticsTitleLabel.setFont(new Font("Arial", Font.BOLD, 15));
         statisticsFrame.add(statisticsTitleLabel);
